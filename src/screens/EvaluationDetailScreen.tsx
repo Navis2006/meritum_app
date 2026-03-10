@@ -48,7 +48,7 @@ const EvaluationDetailScreen = ({ route, navigation }: any) => {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.backgroundLight} />
+            <StatusBar hidden={true} />
 
             {/* Header */}
             <View style={styles.header}>

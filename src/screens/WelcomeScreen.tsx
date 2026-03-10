@@ -52,7 +52,7 @@ const WelcomeScreen = ({ navigation }: any) => {
             activeOpacity={1}
             onPress={handlePress}
         >
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+            <StatusBar hidden={true} />
 
             {/* Top Spacer */}
             <View style={{ flex: 1 }} />

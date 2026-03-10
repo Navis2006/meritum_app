@@ -175,7 +175,7 @@ const AppNavigator = () => {
 
     return (
         <NavigationContainer>
-            <StatusBar hidden />
+            <StatusBar hidden={true} />
             <Stack.Navigator
                 initialRouteName={initialRoute}
                 screenOptions={{ headerShown: false }}

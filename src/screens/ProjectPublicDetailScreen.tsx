@@ -169,7 +169,7 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+            <StatusBar hidden={true} />
 
             <ScrollView contentContainerStyle={{ paddingBottom: 160 }} showsVerticalScrollIndicator={false}>
                 {/* Header Image Section (SIEMPRE imagen) */}

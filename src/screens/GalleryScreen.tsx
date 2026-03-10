@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -12,6 +12,7 @@ import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../theme';
 import { projectsApi, evaluationsApi, Project } from '../services/api';
 import GalleryCard from '../components/GalleryCard';
+import { cacheVideoInBackground } from '../services/videoCacheService';
 
 const GalleryScreen = ({ navigation }: any) => {
     const [projects, setProjects] = useState<Project[]>([]);
@@ -44,6 +45,13 @@ const GalleryScreen = ({ navigation }: any) => {
             ]);
             setProjects(projectsData);
             setLeaderboard(leaderboardData || []);
+
+            // Pre-cachear TODOS los videos preview (son cortos, ~10 seg)
+            projectsData.forEach((p: Project) => {
+                if (p.previewVideoUrl) {
+                    cacheVideoInBackground(p.previewVideoUrl);
+                }
+            });
         } catch (error) {
             console.log('Error loading gallery data:', error);
         } finally {
@@ -85,6 +93,24 @@ const GalleryScreen = ({ navigation }: any) => {
             </View>
         </View>
     );
+    const [activePreviewId, setActivePreviewId] = useState<string | null>(null);
+
+    // Callback when visible items change (for auto-preview during scroll)
+    const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+        if (viewableItems.length > 0) {
+            // Encontrar el item más centrado que tenga preview
+            const withPreview = viewableItems.find(
+                (v: any) => v.item.previewVideoUrl
+            );
+            if (withPreview) {
+                setActivePreviewId(withPreview.item.id);
+            }
+        }
+    }).current;
+
+    const viewabilityConfig = useRef({
+        itemVisiblePercentThreshold: 70,
+    }).current;
 
     return (
         <View style={styles.container}>
@@ -103,10 +129,16 @@ const GalleryScreen = ({ navigation }: any) => {
                             project={item}
                             globalScore={getScoreForProject(item.id)}
                             onPress={() => handleProjectPress(item)}
+                            isActive={activePreviewId === item.id}
+                            onActivate={() => setActivePreviewId(prev =>
+                                prev === item.id ? null : item.id
+                            )}
                         />
                     )}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
+                    onViewableItemsChanged={onViewableItemsChanged}
+                    viewabilityConfig={viewabilityConfig}
                 />
             )}
         </View>

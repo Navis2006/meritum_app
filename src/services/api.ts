@@ -86,6 +86,7 @@ export interface Project {
     title: string;
     description: string;
     imageUrl?: string;
+    previewVideoUrl?: string;
     teamMembers: string;
     categoryId: string;
     videoUrls?: string[];
