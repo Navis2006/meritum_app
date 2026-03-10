@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // ============================================================
 const API_BASE_URL = 'https://meritum.onrender.com/api';
 
+
 const api = axios.create({
     baseURL: API_BASE_URL,
     timeout: 15000,
@@ -91,7 +92,7 @@ export interface Project {
     imageUrl?: string;
     teamMembers: string;
     categoryId: string;
-    videoUrl?: string;
+    videoUrls?: string[];
     documentUrls?: string[];
 }
 

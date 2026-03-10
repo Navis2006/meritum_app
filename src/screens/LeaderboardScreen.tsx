@@ -11,10 +11,10 @@ import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../theme';
 import { evaluationsApi } from '../services/api';
 
-const FILTER_OPTIONS = ['9.0 - 10.0', '8.0 - 8.9', '7.0 - 7.9', '< 7.0'];
+const FILTER_OPTIONS = ['Todos', '9.0 - 10.0', '8.0 - 8.9', '7.0 - 7.9', '< 7.0'];
 
 const LeaderboardScreen = ({ navigation }: any) => {
-    const [activeFilter, setActiveFilter] = useState('9.0 - 10.0');
+    const [activeFilter, setActiveFilter] = useState('Todos');
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -37,13 +37,14 @@ const LeaderboardScreen = ({ navigation }: any) => {
     // The backend provides sorted data. We separate top 3 for the podium.
     const getFilteredData = () => {
         if (!leaderboard) return [];
+        if (activeFilter === 'Todos') return leaderboard;
 
         return leaderboard.filter((item) => {
-            const score = item.finalScore;
-            if (activeFilter === '9.0 - 10.0') return score >= 9.0;
-            if (activeFilter === '8.0 - 8.9') return score >= 8.0 && score < 9.0;
-            if (activeFilter === '7.0 - 7.9') return score >= 7.0 && score < 8.0;
-            return score < 7.0;
+            const s = item.score ?? 0;
+            if (activeFilter === '9.0 - 10.0') return s >= 9.0;
+            if (activeFilter === '8.0 - 8.9') return s >= 8.0 && s < 9.0;
+            if (activeFilter === '7.0 - 7.9') return s >= 7.0 && s < 8.0;
+            return s < 7.0;
         });
     };
 
@@ -73,84 +74,86 @@ const LeaderboardScreen = ({ navigation }: any) => {
                         <Icon name="leaderboard" size={48} color={Colors.gray300} />
                         <Text style={styles.emptyText}>Sin Clasificación Aún</Text>
                         <Text style={styles.emptySubtext}>
-                            Aún no hay proyectos calificados o en este rango.
+                            Aún no hay proyectos calificados.
                         </Text>
                     </View>
                 ) : (
                     <>
-                        {/* Podium */}
-                        <View style={styles.podiumContainer}>
-                            {/* 2nd Place */}
-                            <View style={styles.podiumSide}>
-                                {podiumData[1] && (
-                                    <View style={[styles.podiumCard, Shadows.card]}>
-                                        <View style={styles.podiumAvatarSm}>
-                                            <Icon name="person" size={24} color={Colors.gray400} />
+                        {/* Podium - solo si hay datos en el filtro actual */}
+                        {displayData.length > 0 && (
+                            <View style={styles.podiumContainer}>
+                                {/* 2nd Place */}
+                                <View style={styles.podiumSide}>
+                                    {podiumData[1] && (
+                                        <View style={[styles.podiumCard, Shadows.card]}>
+                                            <View style={styles.podiumAvatarSm}>
+                                                <Icon name="person" size={24} color={Colors.gray400} />
+                                            </View>
+                                            <View style={styles.rankBadgeSm}>
+                                                <Text style={styles.rankTextSm}>#2</Text>
+                                            </View>
+                                            <Text style={styles.podiumName} numberOfLines={1}>
+                                                {podiumData[1].title || 'Proyecto'}
+                                            </Text>
+                                            <Text style={styles.podiumProject} numberOfLines={1}>
+                                                {podiumData[1].teamMembers?.split(',')[0] || 'Equipo'}
+                                            </Text>
+                                            <Text style={styles.podiumScoreSm}>{(podiumData[1].score ?? 0).toFixed(1)}</Text>
                                         </View>
-                                        <View style={styles.rankBadgeSm}>
-                                            <Text style={styles.rankTextSm}>#2</Text>
-                                        </View>
-                                        <Text style={styles.podiumName} numberOfLines={1}>
-                                            {podiumData[1].project?.teamMembers?.split(',')[0] || 'Usuario'}
-                                        </Text>
-                                        <Text style={styles.podiumProject} numberOfLines={1}>
-                                            {podiumData[1].project?.title || 'Proyecto'}
-                                        </Text>
-                                        <Text style={styles.podiumScoreSm}>{podiumData[1].finalScore?.toFixed(1)}</Text>
-                                    </View>
-                                )}
-                            </View>
+                                    )}
+                                </View>
 
-                            {/* 1st Place (Elevated) */}
-                            <View style={[styles.podiumCenter]}>
-                                <Icon
-                                    name="workspace-premium"
-                                    size={28}
-                                    color={Colors.primary}
-                                    style={styles.crownIcon}
-                                />
-                                {podiumData[0] && (
-                                    <View style={[styles.podiumCard, styles.podiumCardCenter, Shadows.soft]}>
-                                        <View style={styles.podiumAvatarLg}>
-                                            <Icon name="person" size={32} color={Colors.gray400} />
+                                {/* 1st Place (Elevated) */}
+                                <View style={[styles.podiumCenter]}>
+                                    <Icon
+                                        name="workspace-premium"
+                                        size={28}
+                                        color={Colors.primary}
+                                        style={styles.crownIcon}
+                                    />
+                                    {podiumData[0] && (
+                                        <View style={[styles.podiumCard, styles.podiumCardCenter, Shadows.soft]}>
+                                            <View style={styles.podiumAvatarLg}>
+                                                <Icon name="person" size={32} color={Colors.gray400} />
+                                            </View>
+                                            <View style={styles.rankBadgeLg}>
+                                                <Text style={styles.rankTextLg}>#1</Text>
+                                            </View>
+                                            <Text style={styles.podiumNameLg} numberOfLines={1}>
+                                                {podiumData[0].title || 'Proyecto'}
+                                            </Text>
+                                            <Text style={styles.podiumProject} numberOfLines={1}>
+                                                {podiumData[0].teamMembers?.split(',')[0] || 'Equipo'}
+                                            </Text>
+                                            <Text style={styles.podiumScoreLg}>{(podiumData[0].score ?? 0).toFixed(1)}</Text>
                                         </View>
-                                        <View style={styles.rankBadgeLg}>
-                                            <Text style={styles.rankTextLg}>#1</Text>
-                                        </View>
-                                        <Text style={styles.podiumNameLg} numberOfLines={1}>
-                                            {podiumData[0].project?.teamMembers?.split(',')[0] || 'Usuario'}
-                                        </Text>
-                                        <Text style={styles.podiumProject} numberOfLines={1}>
-                                            {podiumData[0].project?.title || 'Proyecto'}
-                                        </Text>
-                                        <Text style={styles.podiumScoreLg}>{podiumData[0].finalScore?.toFixed(1)}</Text>
-                                    </View>
-                                )}
-                            </View>
+                                    )}
+                                </View>
 
-                            {/* 3rd Place */}
-                            <View style={styles.podiumSide}>
-                                {podiumData[2] && (
-                                    <View style={[styles.podiumCard, Shadows.card]}>
-                                        <View style={styles.podiumAvatarSm}>
-                                            <Icon name="person" size={24} color={Colors.gray400} />
+                                {/* 3rd Place */}
+                                <View style={styles.podiumSide}>
+                                    {podiumData[2] && (
+                                        <View style={[styles.podiumCard, Shadows.card]}>
+                                            <View style={styles.podiumAvatarSm}>
+                                                <Icon name="person" size={24} color={Colors.gray400} />
+                                            </View>
+                                            <View style={styles.rankBadgeSm}>
+                                                <Text style={styles.rankTextSm}>#3</Text>
+                                            </View>
+                                            <Text style={styles.podiumName} numberOfLines={1}>
+                                                {podiumData[2].title || 'Proyecto'}
+                                            </Text>
+                                            <Text style={styles.podiumProject} numberOfLines={1}>
+                                                {podiumData[2].teamMembers?.split(',')[0] || 'Equipo'}
+                                            </Text>
+                                            <Text style={styles.podiumScoreSm}>{(podiumData[2].score ?? 0).toFixed(1)}</Text>
                                         </View>
-                                        <View style={styles.rankBadgeSm}>
-                                            <Text style={styles.rankTextSm}>#3</Text>
-                                        </View>
-                                        <Text style={styles.podiumName} numberOfLines={1}>
-                                            {podiumData[2].project?.teamMembers?.split(',')[0] || 'Usuario'}
-                                        </Text>
-                                        <Text style={styles.podiumProject} numberOfLines={1}>
-                                            {podiumData[2].project?.title || 'Proyecto'}
-                                        </Text>
-                                        <Text style={styles.podiumScoreSm}>{podiumData[2].finalScore?.toFixed(1)}</Text>
-                                    </View>
-                                )}
+                                    )}
+                                </View>
                             </View>
-                        </View>
+                        )}
 
-                        {/* Filter Chips */}
+                        {/* Filter Chips - SIEMPRE visibles */}
                         <View style={styles.filterContainer}>
                             <TouchableOpacity style={styles.filterIcon}>
                                 <Icon name="filter-list" size={20} color={Colors.gray600} />
@@ -187,24 +190,34 @@ const LeaderboardScreen = ({ navigation }: any) => {
                             </ScrollView>
                         </View>
 
-                        {/* Ranked List */}
-                        <View style={styles.rankedList}>
-                            {rankedData.map((item, index) => (
-                                <View key={item.id} style={[styles.rankedItem, Shadows.card]}>
-                                    <Text style={styles.rankedNumber}>{index + 4}</Text>
-                                    <View style={styles.rankedAvatar}>
-                                        <Icon name="person" size={24} color={Colors.gray400} />
+                        {/* Empty filter message or ranked list */}
+                        {displayData.length === 0 ? (
+                            <View style={styles.emptyFilterState}>
+                                <Icon name="search-off" size={36} color={Colors.gray300} />
+                                <Text style={styles.emptyFilterText}>
+                                    No hay proyectos en el rango {activeFilter}
+                                </Text>
+                            </View>
+                        ) : (
+                            /* Ranked List (4th place onward) */
+                            <View style={styles.rankedList}>
+                                {rankedData.map((item, index) => (
+                                    <View key={item.id} style={[styles.rankedItem, Shadows.card]}>
+                                        <Text style={styles.rankedNumber}>{index + 4}</Text>
+                                        <View style={styles.rankedAvatar}>
+                                            <Icon name="person" size={24} color={Colors.gray400} />
+                                        </View>
+                                        <View style={styles.rankedInfo}>
+                                            <Text style={styles.rankedName}>{item.title || 'Proyecto'}</Text>
+                                            <Text style={styles.rankedProject}>{item.teamMembers || 'Equipo'}</Text>
+                                        </View>
+                                        <View style={styles.rankedScoreContainer}>
+                                            <Text style={styles.rankedScore}>{(item.score ?? 0).toFixed(1)}</Text>
+                                        </View>
                                     </View>
-                                    <View style={styles.rankedInfo}>
-                                        <Text style={styles.rankedName}>{item.project?.teamMembers?.split(',')[0] || 'Usuario'}</Text>
-                                        <Text style={styles.rankedProject}>{item.project?.title || 'Proyecto'}</Text>
-                                    </View>
-                                    <View style={styles.rankedScoreContainer}>
-                                        <Text style={styles.rankedScore}>{item.finalScore?.toFixed(1)}</Text>
-                                    </View>
-                                </View>
-                            ))}
-                        </View>
+                                ))}
+                            </View>
+                        )}
                     </>
                 )}
             </ScrollView>
@@ -481,6 +494,18 @@ const styles = StyleSheet.create({
     },
     emptySubtext: {
         fontSize: 14,
+        color: Colors.gray400,
+        textAlign: 'center',
+    },
+    emptyFilterState: {
+        alignItems: 'center',
+        paddingTop: Spacing.xxxl,
+        paddingBottom: Spacing.xxxl,
+        gap: Spacing.sm,
+    },
+    emptyFilterText: {
+        fontSize: 15,
+        fontWeight: '500',
         color: Colors.gray400,
         textAlign: 'center',
     },

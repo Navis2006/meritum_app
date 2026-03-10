@@ -36,13 +36,18 @@ const EvaluationHistoryScreen = ({ navigation }: any) => {
     const formatDate = (dateStr?: string) => {
         if (!dateStr) return 'Fecha no disponible';
         const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return 'Fecha no disponible';
+        if (isNaN(d.getTime()) || d.getFullYear() <= 1) return 'Fecha no disponible';
 
         const months = [
             'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
             'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
         ];
-        return `${d.getDate().toString().padStart(2, '0')} ${months[d.getMonth()]}, ${d.getFullYear()}`;
+        const day = d.getDate().toString().padStart(2, '0');
+        const month = months[d.getMonth()];
+        const year = d.getFullYear();
+        const hours = d.getHours().toString().padStart(2, '0');
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        return `${day} ${month} ${year}, ${hours}:${minutes}`;
     };
 
     return (
@@ -84,6 +89,7 @@ const EvaluationHistoryScreen = ({ navigation }: any) => {
                             key={evaluation.id || index}
                             style={styles.historyItem}
                             activeOpacity={0.7}
+                            onPress={() => navigation.navigate('EvaluationDetail', { evaluation })}
                         >
                             <View style={styles.itemLeft}>
                                 <Text style={styles.itemTitle}>

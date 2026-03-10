@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         backgroundColor: Colors.white,
+        paddingTop: 48,
         paddingHorizontal: Spacing.md,
         paddingBottom: Spacing.md,
         borderBottomWidth: 1,

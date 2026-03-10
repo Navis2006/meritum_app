@@ -31,14 +31,14 @@ const FEEDBACK_OPTIONS = [
 const EvaluationRubricScreen = ({ route, navigation }: any) => {
     const { projectId, projectTitle } = route.params;
 
-    const [funcionalidad, setFuncionalidad] = useState(8.5);
-    const [rendimiento, setRendimiento] = useState(8.0);
-    const [arquitectura, setArquitectura] = useState(7.5);
-    const [uxui, setUxui] = useState(8.0);
-    const [mvp, setMvp] = useState(8.5);
-    const [analisisMercado, setAnalisisMercado] = useState(7.0);
-    const [objetivosInteligentes, setObjetivosInteligentes] = useState(8.0);
-    const [innovacion, setInnovacion] = useState(9.0);
+    const [funcionalidad, setFuncionalidad] = useState(0.0);
+    const [rendimiento, setRendimiento] = useState(0.0);
+    const [arquitectura, setArquitectura] = useState(0.0);
+    const [uxui, setUxui] = useState(0.0);
+    const [mvp, setMvp] = useState(0.0);
+    const [analisisMercado, setAnalisisMercado] = useState(0.0);
+    const [objetivosInteligentes, setObjetivosInteligentes] = useState(0.0);
+    const [innovacion, setInnovacion] = useState(0.0);
     const [comment, setComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
@@ -71,6 +71,7 @@ const EvaluationRubricScreen = ({ route, navigation }: any) => {
                 await commentsApi.create({
                     projectId,
                     userId: user.id,
+                    userName: user.name || user.email.split('@')[0],
                     content: comment.trim(),
                     rating: totalScore,
                 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -23,6 +23,7 @@ import EditProfileScreen from '../screens/EditProfileScreen';
 import EvaluationHistoryScreen from '../screens/EvaluationHistoryScreen';
 import GalleryScreen from '../screens/GalleryScreen';
 import ProjectPublicDetailScreen from '../screens/ProjectPublicDetailScreen';
+import EvaluationDetailScreen from '../screens/EvaluationDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -79,6 +80,10 @@ const ProfileStackNavigator = () => (
             name="EvaluationHistory"
             component={EvaluationHistoryScreen}
         />
+        <ProfileStack.Screen
+            name="EvaluationDetail"
+            component={EvaluationDetailScreen}
+        />
     </ProfileStack.Navigator>
 );
 
@@ -110,7 +115,7 @@ const MainTabNavigator = () => (
                 else if (route.name === 'GalleryTab') iconName = 'grid-view';
                 else if (route.name === 'LeaderboardTab') iconName = 'leaderboard';
                 else if (route.name === 'ProfileTab') iconName = 'person';
-                return <Icon name={iconName} size={size} color={color} />;
+                return <Icon name={iconName as any} size={size} color={color} />;
             },
         })}
     >
@@ -162,6 +167,7 @@ const AppNavigator = () => {
 
     return (
         <NavigationContainer>
+            <StatusBar hidden />
             <Stack.Navigator
                 initialRouteName={initialRoute}
                 screenOptions={{ headerShown: false }}

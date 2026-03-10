@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -11,6 +11,7 @@ import {
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../theme';
 import { projectsApi, evaluationsApi, Project, sessionStorage } from '../services/api';
+import { useFocusEffect } from '@react-navigation/native';
 import ProjectListItem from '../components/ProjectListItem';
 
 const EvaluationListScreen = ({ route, navigation }: any) => {
@@ -19,9 +20,11 @@ const EvaluationListScreen = ({ route, navigation }: any) => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
 
-    useEffect(() => {
-        loadProjects();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            loadProjects();
+        }, [])
+    );
 
     const loadProjects = async () => {
         try {

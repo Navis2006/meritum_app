@@ -132,16 +132,20 @@ const ProjectDetailScreen = ({ route, navigation }: any) => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Video Full Width Section */}
-                {project.videoUrl && (
+                {/* Video Full Width Section (Multi-video) */}
+                {project.videoUrls && project.videoUrls.length > 0 && (
                     <View style={styles.videoSection}>
-                        <Video
-                            style={{ width: '100%', aspectRatio: 16 / 9, backgroundColor: '#000' }}
-                            source={{ uri: project.videoUrl }}
-                            useNativeControls
-                            resizeMode={ResizeMode.CONTAIN}
-                            isLooping={false}
-                        />
+                        {project.videoUrls.map((vUrl, idx) => (
+                            <View key={idx} style={{ marginBottom: idx < project.videoUrls!.length - 1 ? 12 : 0 }}>
+                                <Video
+                                    style={{ width: '100%', aspectRatio: 16 / 9, backgroundColor: '#000' }}
+                                    source={{ uri: vUrl }}
+                                    useNativeControls
+                                    resizeMode={ResizeMode.CONTAIN}
+                                    isLooping={false}
+                                />
+                            </View>
+                        ))}
                     </View>
                 )}
 

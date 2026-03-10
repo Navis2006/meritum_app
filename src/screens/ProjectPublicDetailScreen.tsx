@@ -87,8 +87,8 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
     };
 
     const handleOpenVideo = () => {
-        if (project?.videoUrl) {
-            Linking.openURL(project.videoUrl);
+        if (project?.videoUrls && project.videoUrls.length > 0) {
+            Linking.openURL(project.videoUrls[0]);
         } else {
             Alert.alert('Aviso', 'No hay video disponible');
         }
@@ -132,31 +132,22 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
     // Parse team members (comma separated string)
     const teamMembers = project.teamMembers ? project.teamMembers.split(',') : [];
 
+    // Videos disponibles
+    const hasVideos = project.videoUrls && project.videoUrls.length > 0;
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
             <ScrollView contentContainerStyle={{ paddingBottom: 160 }} showsVerticalScrollIndicator={false}>
-                {/* Header Video/Image Section */}
+                {/* Header Image Section (SIEMPRE imagen) */}
                 <View style={styles.headerImageContainer}>
-                    {project.videoUrl ? (
-                        <Video
-                            style={styles.headerImage}
-                            source={{ uri: project.videoUrl }}
-                            useNativeControls
-                            resizeMode={ResizeMode.COVER}
-                            isLooping
-                        />
-                    ) : (
-                        <>
-                            <Image
-                                source={{ uri: project.imageUrl || 'https://via.placeholder.com/800x600' }}
-                                style={styles.headerImage}
-                                resizeMode="cover"
-                            />
-                            <View style={styles.overlay} />
-                        </>
-                    )}
+                    <Image
+                        source={{ uri: project.imageUrl || 'https://via.placeholder.com/800x600' }}
+                        style={styles.headerImage}
+                        resizeMode="cover"
+                    />
+                    <View style={styles.overlay} />
 
                     {/* Back Button */}
                     <TouchableOpacity
@@ -165,8 +156,26 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
                     >
                         <Icon name="arrow-back" size={24} color={Colors.white} />
                     </TouchableOpacity>
-
                 </View>
+
+                {/* Videos Section (debajo de la imagen) */}
+                {hasVideos && (
+                    <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.md }}>
+                        <Text style={styles.sectionTitle}>Videos del proyecto ({project.videoUrls!.length})</Text>
+                        {project.videoUrls!.map((videoUrl, idx) => (
+                            <View key={idx} style={{ marginBottom: Spacing.md, borderRadius: BorderRadius.lg, overflow: 'hidden', height: 220, backgroundColor: '#000' }}>
+                                <Video
+                                    style={{ width: '100%', height: '100%' }}
+                                    source={{ uri: videoUrl }}
+                                    useNativeControls
+                                    resizeMode={ResizeMode.CONTAIN}
+                                    shouldPlay={false}
+                                    onError={(e) => console.log('Video error:', e, videoUrl)}
+                                />
+                            </View>
+                        ))}
+                    </View>
+                )}
 
                 {/* Content Section */}
                 <View style={styles.contentContainer}>
