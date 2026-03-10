@@ -17,7 +17,8 @@ import { Video, ResizeMode } from 'expo-av';
 import * as WebBrowser from 'expo-web-browser';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../theme';
-import { projectsApi, commentsApi, Project, Comment, sessionStorage } from '../services/api';
+import { projectsApi, commentsApi, evaluationsApi, Project, Comment, sessionStorage } from '../services/api';
+import { getCachedVideoUri, cacheVideoInBackground } from '../services/videoCacheService';
 
 const { width } = Dimensions.get('window');
 
@@ -26,6 +27,8 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
     const [liked, setLiked] = useState(false);
+    const [alreadyEvaluated, setAlreadyEvaluated] = useState(true); // default true to hide button until checked
+    const [videoSources, setVideoSources] = useState<Record<string, string>>({});
 
     // Comments State
     const [comments, setComments] = useState<Comment[]>([]);
@@ -34,6 +37,7 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
 
     useEffect(() => {
         loadProject();
+        checkIfEvaluated();
     }, []);
 
     const loadProject = async () => {
@@ -44,11 +48,39 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
             // Load comments
             const commentsData = await commentsApi.getByProject(projectId);
             setComments(commentsData);
+
+            // Pre-load cached video URIs
+            if (data.videoUrls && data.videoUrls.length > 0) {
+                const sources: Record<string, string> = {};
+                for (const url of data.videoUrls) {
+                    const cachedUri = await getCachedVideoUri(url);
+                    sources[url] = cachedUri || url;
+                    // Cache video in background if not cached
+                    if (!cachedUri) {
+                        cacheVideoInBackground(url);
+                    }
+                }
+                setVideoSources(sources);
+            }
         } catch (error) {
             console.log('Error loading project:', error);
             Alert.alert('Error', 'Error al cargar proyecto');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkIfEvaluated = async () => {
+        try {
+            const user = await sessionStorage.getUser();
+            if (!user) { setAlreadyEvaluated(true); return; }
+            const historyData = await evaluationsApi.getByUser(user.id);
+            const found = historyData.history?.some(
+                (e: any) => e.projectId === projectId
+            );
+            setAlreadyEvaluated(!!found);
+        } catch {
+            setAlreadyEvaluated(true); // On error, hide button to be safe
         }
     };
 
@@ -166,7 +198,7 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
                             <View key={idx} style={{ marginBottom: Spacing.md, borderRadius: BorderRadius.lg, overflow: 'hidden', height: 220, backgroundColor: '#000' }}>
                                 <Video
                                     style={{ width: '100%', height: '100%' }}
-                                    source={{ uri: videoUrl }}
+                                    source={{ uri: videoSources[videoUrl] || videoUrl }}
                                     useNativeControls
                                     resizeMode={ResizeMode.CONTAIN}
                                     shouldPlay={false}
@@ -234,6 +266,18 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
 
             {/* Bottom Actions (Fixed) */}
             <View style={[styles.bottomActions, Shadows.medium]}>
+                {!alreadyEvaluated && (
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.evaluateButton]}
+                        onPress={() => navigation.navigate('EvaluationRubric', {
+                            projectId: project.id,
+                            projectTitle: project.title,
+                        })}
+                    >
+                        <Icon name="rate-review" size={20} color={Colors.white} />
+                        <Text style={styles.primaryButtonText}>Evaluar Proyecto</Text>
+                    </TouchableOpacity>
+                )}
                 {project.documentUrls && project.documentUrls.length > 0 ? (
                     project.documentUrls.map((docUrl, idx) => (
                         <TouchableOpacity
@@ -544,6 +588,16 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Colors.gray600,
         lineHeight: 20,
+    },
+    evaluateButton: {
+        backgroundColor: '#2E7D32',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: Spacing.sm,
+        paddingVertical: 14,
+        paddingHorizontal: Spacing.lg,
+        borderRadius: BorderRadius.xl,
     },
 });
 

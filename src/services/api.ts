@@ -1,15 +1,11 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { cachedFetch, CACHE_KEYS } from './cacheService';
 
 // ============================================================
 // CONFIGURACIÓN DE LA API
-// Cambia esta URL según tu entorno:
-//   - Emulador Android:  http://10.0.2.2:5227/api
-//   - Dispositivo físico: http://<TU_IP_LOCAL>:5227/api
-//   - Producción:         https://tu-dominio.com/api
 // ============================================================
 const API_BASE_URL = 'https://meritum.onrender.com/api';
-
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -45,14 +41,12 @@ export const authApi = {
     login: async (email: string, password?: string): Promise<User> => {
         const payload: LoginRequest = { email };
         if (password) payload.password = password;
-
         const response = await api.post('/auth/login', payload);
         return response.data;
     },
     register: async (email: string, name: string, password?: string): Promise<User> => {
         const payload: RegisterRequest = { email, name };
         if (password) payload.password = password;
-
         const response = await api.post('/auth/register', payload);
         return response.data;
     },
@@ -77,8 +71,10 @@ export interface Category {
 
 export const categoriesApi = {
     getAll: async (): Promise<Category[]> => {
-        const response = await api.get('/categories');
-        return response.data;
+        return cachedFetch(CACHE_KEYS.CATEGORIES, async () => {
+            const response = await api.get('/categories');
+            return response.data;
+        }, 60); // Cachear 1 hora
     },
 };
 
@@ -97,17 +93,25 @@ export interface Project {
 }
 
 export const projectsApi = {
-    getAll: async (): Promise<Project[]> => {
-        const response = await api.get('/projects');
-        return response.data;
+    getAll: async (categoryId?: string): Promise<Project[]> => {
+        const key = categoryId ? `${CACHE_KEYS.PROJECTS}_${categoryId}` : CACHE_KEYS.PROJECTS;
+        return cachedFetch(key, async () => {
+            const url = categoryId ? `/projects?categoryId=${categoryId}` : '/projects';
+            const response = await api.get(url);
+            return response.data;
+        }, 15); // Cachear 15 minutos
     },
     getByCategory: async (categoryId: string): Promise<Project[]> => {
-        const response = await api.get(`/projects?categoryId=${categoryId}`);
-        return response.data;
+        return cachedFetch(`${CACHE_KEYS.PROJECTS}_${categoryId}`, async () => {
+            const response = await api.get(`/projects?categoryId=${categoryId}`);
+            return response.data;
+        }, 15);
     },
     getById: async (id: string): Promise<Project> => {
-        const response = await api.get(`/projects/${id}`);
-        return response.data;
+        return cachedFetch(CACHE_KEYS.projectDetail(id), async () => {
+            const response = await api.get(`/projects/${id}`);
+            return response.data;
+        }, 10); // Cachear 10 minutos
     },
 };
 
@@ -159,16 +163,20 @@ export const evaluationsApi = {
         return response.data;
     },
     getByUser: async (userId: string): Promise<HistoryResponse> => {
-        const response = await api.get(`/evaluations/user/${userId}`);
-        return response.data;
+        return cachedFetch(CACHE_KEYS.historyKey(userId), async () => {
+            const response = await api.get(`/evaluations/user/${userId}`);
+            return response.data;
+        }, 5); // Cachear 5 minutos
     },
     getAll: async (): Promise<Evaluation[]> => {
         const response = await api.get('/evaluations');
         return response.data;
     },
     getLeaderboard: async (): Promise<any[]> => {
-        const response = await api.get('/evaluations/leaderboard');
-        return response.data;
+        return cachedFetch(CACHE_KEYS.LEADERBOARD, async () => {
+            const response = await api.get('/evaluations/leaderboard');
+            return response.data;
+        }, 10); // Cachear 10 minutos
     }
 };
 
@@ -187,8 +195,10 @@ export interface Comment {
 
 export const commentsApi = {
     getByProject: async (projectId: string): Promise<Comment[]> => {
-        const response = await api.get(`/comments/project/${projectId}`);
-        return response.data;
+        return cachedFetch(`@cache_comments_${projectId}`, async () => {
+            const response = await api.get(`/comments/project/${projectId}`);
+            return response.data;
+        }, 5);
     },
     create: async (comment: Comment): Promise<Comment> => {
         const response = await api.post('/comments', comment);

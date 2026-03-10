@@ -66,6 +66,14 @@ const GalleryStackNavigator = () => (
             name="ProjectPublicDetail"
             component={ProjectPublicDetailScreen}
         />
+        <GalleryStack.Screen
+            name="EvaluationRubric"
+            component={EvaluationRubricScreen}
+        />
+        <GalleryStack.Screen
+            name="EvaluationSuccess"
+            component={EvaluationSuccessScreen}
+        />
     </GalleryStack.Navigator>
 );
 
