@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -6,7 +6,10 @@ import {
     TouchableOpacity,
     StyleSheet,
     ActivityIndicator,
+    RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../theme';
 import { evaluationsApi } from '../services/api';
@@ -14,13 +17,18 @@ import { evaluationsApi } from '../services/api';
 const FILTER_OPTIONS = ['Todos', '9.0 - 10.0', '8.0 - 8.9', '7.0 - 7.9', '< 7.0'];
 
 const LeaderboardScreen = ({ navigation }: any) => {
+    const insets = useSafeAreaInsets();
     const [activeFilter, setActiveFilter] = useState('Todos');
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
-    useEffect(() => {
-        loadLeaderboard();
-    }, []);
+    // Re-fetch when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            loadLeaderboard();
+        }, [])
+    );
 
     const loadLeaderboard = async () => {
         try {
@@ -30,7 +38,13 @@ const LeaderboardScreen = ({ navigation }: any) => {
             console.log('Error fetching leaderboard:', error);
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
+    };
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        loadLeaderboard();
     };
 
     // Derived states
@@ -55,10 +69,10 @@ const LeaderboardScreen = ({ navigation }: any) => {
     return (
         <View style={styles.container}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 12 }]}>
                 <Text style={styles.headerTitle}>Clasificación de Proyectos</Text>
                 <TouchableOpacity style={styles.profileButton}>
-                    <Icon name="account-circle" size={32} color={Colors.textMain} />
+                    <Icon name="account-circle" size={32} color={Colors.white} />
                 </TouchableOpacity>
             </View>
 
@@ -66,6 +80,9 @@ const LeaderboardScreen = ({ navigation }: any) => {
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary]} />
+                }
             >
                 {loading ? (
                     <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: Spacing.xxxl }} />
@@ -228,23 +245,22 @@ const LeaderboardScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.backgroundLight,
+        backgroundColor: '#faf5ef',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: Spacing.lg,
-        paddingTop: 48,
         paddingBottom: Spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: `${Colors.gray200}50`,
-        backgroundColor: Colors.backgroundLight,
+        borderBottomWidth: 3,
+        borderBottomColor: Colors.primary,
+        backgroundColor: Colors.backgroundDark,
     },
     headerTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: Colors.textMain,
+        fontSize: 20,
+        fontWeight: '800',
+        color: Colors.primary,
         letterSpacing: -0.2,
     },
     profileButton: {

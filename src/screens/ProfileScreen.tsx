@@ -6,12 +6,16 @@ import {
     StyleSheet,
     ActivityIndicator,
     Alert,
+    ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../theme';
 import { authApi, evaluationsApi, sessionStorage } from '../services/api';
+import { Shadows } from '../theme';
 
 const ProfileScreen = ({ navigation }: any) => {
+    const insets = useSafeAreaInsets();
     const [role, setRole] = useState('');
     const [totalEvaluations, setTotalEvaluations] = useState(0);
     const [averageScore, setAverageScore] = useState(0);
@@ -80,81 +84,90 @@ const ProfileScreen = ({ navigation }: any) => {
     return (
         <View style={styles.container}>
             {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.headerButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Icon name="arrow-back-ios-new" size={22} color={Colors.textMain} />
-                </TouchableOpacity>
+            <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 12 }]}>
+                <Text style={styles.headerTitle}>Mi Perfil</Text>
                 <TouchableOpacity
                     style={styles.editButton}
                     onPress={() => navigation.navigate('EditProfile')}
                 >
-                    <Text style={styles.editText}>Editar</Text>
+                    <Icon name="edit" size={24} color={Colors.white} />
                 </TouchableOpacity>
             </View>
 
-            {/* Profile Section */}
-            <View style={styles.profileSection}>
-                {/* Avatar */}
-                <View style={styles.avatarContainer}>
-                    <View style={styles.avatar}>
-                        <Text style={{ fontSize: 48, fontWeight: 'bold', color: Colors.gray400 }}>
-                            {name ? name.charAt(0).toUpperCase() : (email ? email.charAt(0).toUpperCase() : 'U')}
+            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                {/* Profile Section */}
+                <View style={styles.profileSection}>
+                    {/* Avatar */}
+                    <View style={styles.avatarContainer}>
+                        <View style={styles.avatar}>
+                            <Text style={{ fontSize: 48, fontWeight: 'bold', color: Colors.gray400 }}>
+                                {name ? name.charAt(0).toUpperCase() : (email ? email.charAt(0).toUpperCase() : 'U')}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Info */}
+                    <Text style={styles.userNameText}>{name || email.split('@')[0] || 'Usuario'}</Text>
+                    <Text style={styles.emailText}>{email}</Text>
+
+                    {/* Role Badge */}
+                    <View style={styles.roleBadge}>
+                        <Icon name="verified-user" size={16} color={Colors.primary} />
+                        <Text style={styles.roleText}>
+                            {role?.toUpperCase() || 'USUARIO'}
                         </Text>
                     </View>
                 </View>
 
-                {/* Info */}
-                <Text style={styles.userNameText}>{name || email.split('@')[0] || 'Usuario'}</Text>
-
-                {/* Role Badge */}
-                <View style={styles.roleBadge}>
-                    <Text style={styles.roleText}>
-                        {role?.toUpperCase() || 'USUARIO'}
-                    </Text>
-                </View>
-            </View>
-
-            {/* Stats Section */}
-            <View style={styles.statsSection}>
-                <View style={styles.statsRow}>
-                    <View style={[styles.statItem, styles.statBorderRight]}>
-                        <Text style={styles.statNumber}>
-                            {totalEvaluations}
-                        </Text>
-                        <Text style={styles.statLabel}>Evaluaciones</Text>
-                    </View>
-                    <View style={styles.statItem}>
-                        <Text style={styles.statNumber}>
-                            {averageScore.toFixed(1)}
-                        </Text>
-                        <Text style={styles.statLabel}>Promedio</Text>
+                {/* Stats Section */}
+                <View style={styles.statsSection}>
+                    <View style={[styles.statsRow, Shadows.card]}>
+                        <View style={[styles.statItem, styles.statBorderRight]}>
+                            <Icon name="assignment-turned-in" size={28} color={Colors.primary} />
+                            <Text style={styles.statNumber}>
+                                {totalEvaluations}
+                            </Text>
+                            <Text style={styles.statLabel}>Evaluaciones</Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <Icon name="star" size={28} color="#f59e0b" />
+                            <Text style={styles.statNumber}>
+                                {averageScore.toFixed(1)}
+                            </Text>
+                            <Text style={styles.statLabel}>Prom. Otorgado</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
 
-            {/* History Link */}
-            <TouchableOpacity
-                style={styles.historyButton}
-                onPress={() => navigation.navigate('EvaluationHistory')}
-            >
-                <Icon name="history" size={22} color={Colors.primary} />
-                <Text style={styles.historyText}>Ver Historial de Evaluaciones</Text>
-                <Icon name="chevron-right" size={22} color={Colors.gray400} />
-            </TouchableOpacity>
+                {/* Actions Section */}
+                <View style={styles.actionsContainer}>
+                    {/* History Link */}
+                    <TouchableOpacity
+                        style={[styles.actionButton, Shadows.soft]}
+                        onPress={() => navigation.navigate('EvaluationHistory')}
+                    >
+                        <View style={styles.actionIconContainer}>
+                            <Icon name="history" size={24} color={Colors.white} />
+                        </View>
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.actionTitle}>Historial de Evaluaciones</Text>
+                            <Text style={styles.actionSubtitle}>Mira tus calificaciones pasadas</Text>
+                        </View>
+                        <Icon name="chevron-right" size={24} color={Colors.gray400} />
+                    </TouchableOpacity>
+                </View>
 
-            {/* Logout Button */}
-            <View style={styles.logoutSection}>
-                <TouchableOpacity
-                    style={styles.logoutButton}
-                    onPress={handleLogout}
-                    activeOpacity={0.9}
-                >
-                    <Text style={styles.logoutText}>Cerrar Sesión</Text>
-                </TouchableOpacity>
-            </View>
+                {/* Logout Button */}
+                <View style={styles.logoutSection}>
+                    <TouchableOpacity
+                        style={styles.logoutButton}
+                        onPress={handleLogout}
+                        activeOpacity={0.9}
+                    >
+                        <Text style={styles.logoutText}>Cerrar Sesión</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
         </View>
     );
 };
@@ -162,7 +175,7 @@ const ProfileScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.white,
+        backgroundColor: '#faf5ef',
     },
     centered: {
         alignItems: 'center',
@@ -172,108 +185,147 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: Spacing.lg,
-        paddingTop: Spacing.xl + 24,
+        paddingHorizontal: Spacing.xl,
+        paddingBottom: Spacing.lg,
+        backgroundColor: Colors.backgroundDark,
+        borderBottomWidth: 3,
+        borderBottomColor: Colors.primary,
+        zIndex: 10,
     },
-    headerButton: {
-        padding: Spacing.sm,
-        borderRadius: BorderRadius.full,
+    headerTitle: {
+        fontSize: 24,
+        fontWeight: '800',
+        color: Colors.primary,
+        letterSpacing: -0.3,
     },
     editButton: {
         padding: Spacing.sm,
-    },
-    editText: {
-        color: Colors.primary,
-        fontSize: 16,
-        fontWeight: '700',
-        letterSpacing: 0.2,
+        backgroundColor: Colors.primary + '40',
+        borderRadius: BorderRadius.full,
     },
     profileSection: {
         alignItems: 'center',
-        marginTop: Spacing.xl,
-        gap: Spacing.xl,
+        marginTop: Spacing.xxl,
+        paddingHorizontal: Spacing.xl,
     },
     avatarContainer: {
         position: 'relative',
+        marginBottom: Spacing.sm,
+        padding: 4,
+        borderRadius: 72,
+        backgroundColor: Colors.white,
+        borderWidth: 2,
+        borderColor: Colors.primary,
     },
     avatar: {
-        width: 128,
-        height: 128,
-        borderRadius: 64,
+        width: 120,
+        height: 120,
+        borderRadius: 60,
         backgroundColor: Colors.gray200,
         alignItems: 'center',
         justifyContent: 'center',
     },
+    userNameText: {
+        fontSize: 28,
+        fontWeight: '800',
+        color: Colors.textMain,
+    },
+    emailText: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: Colors.gray500,
+        marginTop: 4,
+        marginBottom: Spacing.md,
+    },
     roleBadge: {
-        paddingHorizontal: Spacing.xl,
-        paddingVertical: Spacing.sm,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: Spacing.lg,
+        paddingVertical: 6,
         borderRadius: BorderRadius.full,
-        backgroundColor: `${Colors.primary}15`,
+        backgroundColor: `${Colors.primary}20`,
+        gap: 6,
     },
     roleText: {
-        color: Colors.primary,
+        color: Colors.primaryDark,
         fontSize: 14,
-        fontWeight: '500',
+        fontWeight: '700',
         letterSpacing: 1,
-    },
-    userNameText: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: Colors.textMain,
-        marginTop: 8,
     },
     statsSection: {
         marginTop: Spacing.xxxl,
-        paddingHorizontal: Spacing.xxl,
+        paddingHorizontal: Spacing.lg,
     },
     statsRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: Colors.white,
+        borderRadius: BorderRadius.xl,
+        paddingVertical: Spacing.lg,
     },
     statItem: {
         flex: 1,
         alignItems: 'center',
-        gap: 4,
+        gap: 6,
     },
     statBorderRight: {
         borderRightWidth: 1,
-        borderRightColor: Colors.gray200,
+        borderRightColor: Colors.gray100,
     },
     statNumber: {
-        fontSize: 30,
+        fontSize: 28,
         fontWeight: '800',
-        color: Colors.primary,
-        lineHeight: 36,
-    },
-    statLabel: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: Colors.gray500,
-    },
-    historyButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginHorizontal: Spacing.xl,
-        marginTop: Spacing.xxxl,
-        paddingVertical: Spacing.lg,
-        paddingHorizontal: Spacing.lg,
-        backgroundColor: Colors.backgroundLight,
-        borderRadius: BorderRadius.lg,
-        gap: Spacing.md,
-    },
-    historyText: {
-        flex: 1,
-        fontSize: 15,
-        fontWeight: '600',
         color: Colors.textMain,
     },
-    logoutSection: {
+    statLabel: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: Colors.gray400,
+        textTransform: 'uppercase',
+    },
+    actionsContainer: {
+        paddingHorizontal: Spacing.lg,
+        marginTop: Spacing.xxxl,
+    },
+    actionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: Spacing.md,
+        backgroundColor: Colors.white,
+        borderRadius: BorderRadius.xl,
+        marginBottom: Spacing.md,
+    },
+    actionIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: Colors.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: Spacing.md,
+    },
+    actionTextContainer: {
         flex: 1,
-        justifyContent: 'flex-end',
+    },
+    actionTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: Colors.textMain,
+        marginBottom: 2,
+    },
+    actionSubtitle: {
+        fontSize: 13,
+        color: Colors.gray500,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        paddingBottom: Spacing.xxxl,
+    },
+    logoutSection: {
+        marginTop: Spacing.xxxl,
         alignItems: 'center',
         paddingHorizontal: Spacing.xl,
-        paddingBottom: 100,
     },
     logoutButton: {
         width: '100%',

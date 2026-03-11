@@ -131,21 +131,45 @@ const MainTabNavigator = () => (
             name="DashboardTab"
             component={DashboardStackNavigator}
             options={{ title: 'Inicio' }}
+            listeners={({ navigation }) => ({
+                tabPress: (e) => {
+                    e.preventDefault();
+                    navigation.navigate('DashboardTab', { screen: 'Dashboard' });
+                },
+            })}
         />
         <Tab.Screen
             name="GalleryTab"
             component={GalleryStackNavigator}
-            options={{ title: 'Galería' }}
+            options={{ title: 'Catálogo' }}
+            listeners={({ navigation }) => ({
+                tabPress: (e) => {
+                    e.preventDefault();
+                    navigation.navigate('GalleryTab', { screen: 'Gallery' });
+                },
+            })}
         />
         <Tab.Screen
             name="LeaderboardTab"
             component={LeaderboardScreen}
             options={{ title: 'Ranking' }}
+            listeners={({ navigation }) => ({
+                tabPress: (e) => {
+                    e.preventDefault();
+                    navigation.navigate('LeaderboardTab');
+                },
+            })}
         />
         <Tab.Screen
             name="ProfileTab"
             component={ProfileStackNavigator}
             options={{ title: 'Perfil' }}
+            listeners={({ navigation }) => ({
+                tabPress: (e) => {
+                    e.preventDefault();
+                    navigation.navigate('ProfileTab', { screen: 'Profile' });
+                },
+            })}
         />
     </Tab.Navigator>
 );

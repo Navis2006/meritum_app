@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import * as WebBrowser from 'expo-web-browser';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../theme';
 import { projectsApi, commentsApi, evaluationsApi, Project, Comment, sessionStorage } from '../services/api';
@@ -23,6 +24,7 @@ import { getCachedVideoUri, cacheVideoInBackground } from '../services/videoCach
 const { width } = Dimensions.get('window');
 
 const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
+    const insets = useSafeAreaInsets();
     const { projectId } = route.params;
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
@@ -169,6 +171,7 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
 
     return (
         <View style={styles.container}>
+            <View style={{ height: Math.max(insets.top, 20), backgroundColor: Colors.backgroundDark }} />
             <StatusBar hidden={true} />
 
             <ScrollView contentContainerStyle={{ paddingBottom: 160 }} showsVerticalScrollIndicator={false}>
@@ -183,7 +186,7 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
 
                     {/* Back Button */}
                     <TouchableOpacity
-                        style={styles.backButton}
+                        style={[styles.backButton, { top: 16 }]}
                         onPress={() => navigation.goBack()}
                     >
                         <Icon name="arrow-back" size={24} color={Colors.white} />
@@ -306,7 +309,7 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.background,
+        backgroundColor: '#faf5ef',
     },
     loadingContainer: {
         flex: 1,

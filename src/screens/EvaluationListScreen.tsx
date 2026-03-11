@@ -12,9 +12,11 @@ import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../theme';
 import { projectsApi, evaluationsApi, Project, sessionStorage } from '../services/api';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ProjectListItem from '../components/ProjectListItem';
 
 const EvaluationListScreen = ({ route, navigation }: any) => {
+    const insets = useSafeAreaInsets();
     const { categoryId, categoryName } = route.params;
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
@@ -63,10 +65,10 @@ const EvaluationListScreen = ({ route, navigation }: any) => {
     return (
         <View style={styles.container}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 12 }]}>
                 <Text style={styles.headerTitle}>{categoryName || 'Lista de Evaluación'}</Text>
                 <TouchableOpacity style={styles.filterButton}>
-                    <Icon name="filter-list" size={24} color={Colors.textMain} />
+                    <Icon name="filter-list" size={24} color={Colors.white} />
                 </TouchableOpacity>
             </View>
 
@@ -124,21 +126,22 @@ const EvaluationListScreen = ({ route, navigation }: any) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.backgroundLight,
+        backgroundColor: '#faf5ef',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: Spacing.xl,
-        paddingTop: Spacing.xxl,
         paddingBottom: Spacing.lg,
-        backgroundColor: Colors.backgroundLight,
+        backgroundColor: Colors.backgroundDark,
+        borderBottomWidth: 3,
+        borderBottomColor: Colors.primary,
     },
     headerTitle: {
         fontSize: 24,
-        fontWeight: '700',
-        color: Colors.textMain,
+        fontWeight: '800',
+        color: Colors.primary,
         letterSpacing: -0.3,
     },
     filterButton: {
@@ -148,8 +151,8 @@ const styles = StyleSheet.create({
     searchContainer: {
         paddingHorizontal: Spacing.xl,
         paddingBottom: Spacing.xl,
-        paddingTop: Spacing.sm,
-        backgroundColor: Colors.backgroundLight,
+        paddingTop: Spacing.lg,
+        backgroundColor: '#faf5ef',
     },
     searchBar: {
         flexDirection: 'row',

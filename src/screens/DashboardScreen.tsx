@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -8,6 +8,8 @@ import {
     ActivityIndicator,
     RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { Colors, Spacing, Shadows } from '../theme';
 import {
@@ -29,6 +31,7 @@ const ICON_MAP: Record<string, { icon: string; color: string }> = {
 };
 
 const DashboardScreen = ({ navigation }: any) => {
+    const insets = useSafeAreaInsets();
     const [categories, setCategories] = useState<Category[]>([]);
     const [projectCounts, setProjectCounts] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
@@ -84,9 +87,12 @@ const DashboardScreen = ({ navigation }: any) => {
         }
     };
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    // Re-fetch when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+        }, [])
+    );
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -101,7 +107,7 @@ const DashboardScreen = ({ navigation }: any) => {
     return (
         <View style={styles.container}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 12 }]}>
                 <View>
                     <Text style={styles.greeting}>Hola, {userName}</Text>
                     <Text style={styles.subtitle}>Bienvenido a Meritum</Text>
@@ -110,7 +116,7 @@ const DashboardScreen = ({ navigation }: any) => {
                     style={styles.profileButton}
                     onPress={() => navigation.navigate('ProfileTab')}
                 >
-                    <Icon name="account-circle" size={36} color={Colors.textMain} />
+                    <Icon name="account-circle" size={36} color={Colors.white} />
                 </TouchableOpacity>
             </View>
 
@@ -181,28 +187,29 @@ const DashboardScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.backgroundLight,
+        backgroundColor: '#faf5ef',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: Spacing.xl,
-        paddingTop: 48,
         paddingBottom: Spacing.lg,
-        backgroundColor: Colors.backgroundLight,
+        backgroundColor: Colors.backgroundDark,
+        borderBottomWidth: 3,
+        borderBottomColor: Colors.primary,
     },
     greeting: {
         fontSize: 24,
         fontWeight: '800',
-        color: Colors.textMain,
+        color: Colors.primary,
         lineHeight: 28,
         letterSpacing: -0.3,
     },
     subtitle: {
         fontSize: 14,
         fontWeight: '500',
-        color: Colors.textSecondary,
+        color: Colors.white,
         marginTop: 2,
     },
     profileButton: {

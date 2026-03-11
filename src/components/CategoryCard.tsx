@@ -26,14 +26,25 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 
     return (
         <TouchableOpacity
-            style={[styles.container, Shadows.card]}
+            style={[
+                styles.container,
+                Shadows.medium,
+                {
+                    borderColor: iconColor + '60',
+                    borderWidth: 1.5,
+                    shadowColor: iconColor,
+                    shadowOpacity: 0.25,
+                    shadowRadius: 12,
+                    elevation: 6,
+                }
+            ]}
             onPress={onPress}
             activeOpacity={0.85}
         >
             <View style={styles.header}>
                 <View style={styles.headerLeft}>
                     <View style={[styles.iconContainer, { backgroundColor: bgColor }]}>
-                        <Icon name={iconName} size={28} color={iconColor} />
+                        <Icon name={iconName as any} size={28} color={iconColor} />
                     </View>
                     <View style={styles.textContainer}>
                         <Text style={styles.title}>{name}</Text>
@@ -42,8 +53,8 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                         </Text>
                     </View>
                 </View>
-                <View style={styles.chevronContainer}>
-                    <Icon name="chevron-right" size={24} color={Colors.textMuted} />
+                <View style={[styles.chevronContainer, { backgroundColor: iconColor + '15' }]}>
+                    <Icon name="chevron-right" size={24} color={iconColor} />
                 </View>
             </View>
 
