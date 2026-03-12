@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, Animated, Easing } from 'react-native';
+import UniversalVideoPlayer from './UniversalVideoPlayer';
 import { Colors, Spacing, Shadows, BorderRadius } from '../theme';
 import { Project } from '../services/api';
 import { getCachedVideoUri } from '../services/videoCacheService';
@@ -62,7 +62,6 @@ const GalleryCard = ({
     isActive,
     onActivate,
 }: GalleryCardProps) => {
-    const videoRef = useRef<Video>(null);
     const hasPreview = !!project.previewVideoUrl;
     const [previewUri, setPreviewUri] = useState<string>(project.previewVideoUrl || '');
 
@@ -77,6 +76,38 @@ const GalleryCard = ({
             });
         }
     }, [project.previewVideoUrl]);
+
+    // Estados para animación y delay
+    const [showVideo, setShowVideo] = useState(false);
+    const [hasPlayed, setHasPlayed] = useState(false);
+    const videoOpacity = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        let timeout: NodeJS.Timeout;
+        if (isActive && hasPreview && !hasPlayed) {
+            timeout = setTimeout(() => {
+                setShowVideo(true);
+                Animated.timing(videoOpacity, {
+                    toValue: 1,
+                    duration: 800, // Transición suave de 800ms
+                    easing: Easing.inOut(Easing.ease),
+                    useNativeDriver: true,
+                }).start();
+            }, 1500); // 1.5 segundos de retraso pedido por el usuario
+        } else {
+            Animated.timing(videoOpacity, {
+                toValue: 0,
+                duration: 500,
+                useNativeDriver: true,
+            }).start(() => {
+                setShowVideo(false);
+                if (!isActive) {
+                    setHasPlayed(false); // Resetear para que pueda volver a reproducirse si se hace scroll de vuelta
+                }
+            });
+        }
+        return () => clearTimeout(timeout);
+    }, [isActive, hasPreview, hasPlayed, videoOpacity]);
 
     return (
         <TouchableOpacity
@@ -100,22 +131,28 @@ const GalleryCard = ({
         >
             {/* TOP: Image / Video Preview */}
             <View style={styles.imageContainer}>
-                {isActive && hasPreview ? (
-                    <Video
-                        ref={videoRef}
-                        source={{ uri: previewUri }}
-                        style={styles.media}
-                        resizeMode={ResizeMode.COVER}
-                        shouldPlay={true}
-                        isLooping={true}
-                        isMuted={true}
-                    />
-                ) : (
-                    <Image
-                        source={{ uri: project.imageUrl || 'https://via.placeholder.com/400x200' }}
-                        style={styles.media}
-                        resizeMode="cover"
-                    />
+                {/* La imagen siempre está en el fondo para evitar pantallas negras */}
+                <Image
+                    source={{ uri: project.imageUrl || 'https://via.placeholder.com/400x200' }}
+                    style={styles.media}
+                    resizeMode="cover"
+                />
+
+                {/* El video se superpone con opacidad animada por encima de la imagen */}
+                {hasPreview && showVideo && (
+                    <Animated.View style={[StyleSheet.absoluteFill, { opacity: videoOpacity }]}>
+                        <UniversalVideoPlayer
+                            url={previewUri}
+                            height={IMAGE_HEIGHT}
+                            style={[styles.media, { backgroundColor: 'transparent' }]}
+                            shouldPlay={isActive && !hasPlayed}
+                            isLooping={false} // El usuario pidió que NO se repita en loop continuamente
+                            isMuted={true}
+                            contentFit="cover"
+                            showControls={false}
+                            onEnded={() => setHasPlayed(true)}
+                        />
+                    </Animated.View>
                 )}
 
                 {/* Category badge (top-left) */}

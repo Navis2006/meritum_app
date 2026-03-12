@@ -25,6 +25,9 @@ const GalleryScreen = ({ navigation }: any) => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+    
+    // Referencia para la lógica de viewability sin perder el entorno
+    const filteredLengthRef = useRef(0);
 
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
@@ -56,6 +59,7 @@ const GalleryScreen = ({ navigation }: any) => {
         }
 
         setFilteredProjects(result);
+        filteredLengthRef.current = result.length;
     }, [searchQuery, projects, activeCategoryId]);
 
     const loadData = async () => {
@@ -146,18 +150,29 @@ const GalleryScreen = ({ navigation }: any) => {
     // Callback when visible items change (for auto-preview during scroll)
     const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
         if (viewableItems.length > 0) {
-            // Encontrar el item más centrado que tenga preview
-            const withPreview = viewableItems.find(
-                (v: any) => v.item.previewVideoUrl
-            );
-            if (withPreview) {
-                setActivePreviewId(withPreview.item.id);
+            const previews = viewableItems.filter((v: any) => v.item.previewVideoUrl);
+            if (previews.length > 0) {
+                // Si hay varios items en pantalla, revisamos si el último es literalmente el último del catálogo
+                const lastVisibleItem = previews[previews.length - 1];
+                const isVeryLastInList = lastVisibleItem.index === filteredLengthRef.current - 1;
+                
+                // Si el usuario bajó hasta el final y vemos el último item, dale prioridad absolute a ese.
+                if (isVeryLastInList) {
+                    setActivePreviewId(lastVisibleItem.item.id);
+                } else {
+                    // Si no estamos en el fondo, preferimos el item más alto en la pantalla
+                    setActivePreviewId(previews[0].item.id);
+                }
+            } else {
+                setActivePreviewId(null);
             }
+        } else {
+            setActivePreviewId(null);
         }
     }).current;
 
     const viewabilityConfig = useRef({
-        itemVisiblePercentThreshold: 70,
+        itemVisiblePercentThreshold: 50,
     }).current;
 
     const renderFilterModal = () => (

@@ -13,15 +13,17 @@ import {
     ActivityIndicator,
     TextInput
 } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
 import * as WebBrowser from 'expo-web-browser';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
+import UniversalVideoPlayer from '../components/UniversalVideoPlayer';
 import { Colors, Spacing, BorderRadius, Shadows } from '../theme';
 import { projectsApi, commentsApi, evaluationsApi, Project, Comment, sessionStorage } from '../services/api';
 import { getCachedVideoUri, cacheVideoInBackground } from '../services/videoCacheService';
 
 const { width } = Dimensions.get('window');
+const VIDEO_WIDTH = width - (Spacing.lg * 2);
+const VIDEO_HEIGHT = Math.round(VIDEO_WIDTH * (9 / 16));
 
 const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
     const insets = useSafeAreaInsets();
@@ -198,15 +200,8 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
                     <View style={{ paddingHorizontal: Spacing.lg, paddingTop: Spacing.md }}>
                         <Text style={styles.sectionTitle}>Videos del proyecto ({project.videoUrls!.length})</Text>
                         {project.videoUrls!.map((videoUrl, idx) => (
-                            <View key={idx} style={{ marginBottom: Spacing.md, borderRadius: BorderRadius.lg, overflow: 'hidden', height: 220, backgroundColor: '#000' }}>
-                                <Video
-                                    style={{ width: '100%', height: '100%' }}
-                                    source={{ uri: videoSources[videoUrl] || videoUrl }}
-                                    useNativeControls
-                                    resizeMode={ResizeMode.CONTAIN}
-                                    shouldPlay={false}
-                                    onError={(e) => console.log('Video error:', e, videoUrl)}
-                                />
+                            <View key={idx} style={{ marginBottom: Spacing.md, borderRadius: BorderRadius.lg, overflow: 'hidden', height: VIDEO_HEIGHT, backgroundColor: '#000' }}>
+                                <UniversalVideoPlayer url={videoSources[videoUrl] || videoUrl} height={VIDEO_HEIGHT} />
                             </View>
                         ))}
                     </View>
