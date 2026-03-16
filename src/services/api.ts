@@ -5,7 +5,7 @@ import { cachedFetch, CACHE_KEYS } from './cacheService';
 // ============================================================
 // CONFIGURACIÓN DE LA API
 // ============================================================
-const API_BASE_URL = 'https://meritum.onrender.com/api';
+const API_BASE_URL = 'https://meritum.koyeb.app/api';
 
 const api = axios.create({
     baseURL: API_BASE_URL,

@@ -147,7 +147,7 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
 
     const handleOpenDoc = async (url: string) => {
         // Construct full url if it is relative
-        const fullUrl = url.startsWith('http') ? url : `https://meritum.onrender.com${url}`;
+        const fullUrl = url.startsWith('http') ? url : `https://meritum.koyeb.app${url}`;
         try {
             await WebBrowser.openBrowserAsync(fullUrl);
         } catch (error) {
