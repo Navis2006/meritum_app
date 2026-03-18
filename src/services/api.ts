@@ -91,6 +91,7 @@ export interface Project {
     categoryId: string;
     videoUrls?: string[];
     documentUrls?: string[];
+    technologies?: string[];
 }
 
 export const projectsApi = {

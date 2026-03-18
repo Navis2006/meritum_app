@@ -145,14 +145,11 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
         }
     };
 
-    const handleOpenDoc = async (url: string) => {
+    const handleOpenDoc = async (url: string, index: number) => {
         // Construct full url if it is relative
         const fullUrl = url.startsWith('http') ? url : `https://meritum.koyeb.app${url}`;
-        try {
-            await WebBrowser.openBrowserAsync(fullUrl);
-        } catch (error) {
-            Linking.openURL(fullUrl);
-        }
+        const title = project?.documentUrls ? getFileName(url) : `Documento ${index + 1}`;
+        navigation.navigate('DocumentViewer', { url: fullUrl, title });
     };
 
 
@@ -215,6 +212,17 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
                     <Text style={styles.description}>
                         {project.description || 'Sin descripción disponible para este proyecto.'}
                     </Text>
+
+                    {/* Tecnologías */}
+                    {project.technologies && project.technologies.length > 0 && (
+                        <View style={styles.techRow}>
+                            {project.technologies.map((tech, idx) => (
+                                <View key={idx} style={styles.techChip}>
+                                    <Text style={styles.techText}>{tech.trim()}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
 
                     {/* Team Section */}
                     <View style={styles.section}>
@@ -281,7 +289,7 @@ const ProjectPublicDetailScreen = ({ route, navigation }: any) => {
                         <TouchableOpacity
                             key={idx}
                             style={[styles.actionButton, styles.primaryButton]}
-                            onPress={() => handleOpenDoc(docUrl)}
+                            onPress={() => handleOpenDoc(docUrl, idx)}
                         >
                             <Icon name="description" size={20} color={Colors.white} />
                             <Text style={styles.primaryButtonText} numberOfLines={1}>{getFileName(docUrl)}</Text>
@@ -596,6 +604,25 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         paddingHorizontal: Spacing.lg,
         borderRadius: BorderRadius.xl,
+    },
+    techRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: Spacing.xs,
+        marginTop: Spacing.sm,
+        marginBottom: Spacing.lg,
+    },
+    techChip: {
+        backgroundColor: Colors.primary + '20',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 9999,
+    },
+    techText: {
+        color: Colors.primary,
+        fontSize: 12,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
     },
 });
 

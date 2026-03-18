@@ -9,6 +9,7 @@ import { Colors } from '../theme';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import HelpScreen from '../screens/HelpScreen';
 import PrivacyScreen from '../screens/PrivacyScreen';
@@ -24,6 +25,7 @@ import EvaluationHistoryScreen from '../screens/EvaluationHistoryScreen';
 import GalleryScreen from '../screens/GalleryScreen';
 import ProjectPublicDetailScreen from '../screens/ProjectPublicDetailScreen';
 import EvaluationDetailScreen from '../screens/EvaluationDetailScreen';
+import DocumentViewerScreen from '../screens/DocumentViewerScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -206,12 +208,20 @@ const AppNavigator = () => {
             >
                 {/* Auth Screens */}
                 <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Register" component={RegisterScreen} />
                 <Stack.Screen name="SignUp" component={SignUpScreen} />
                 <Stack.Screen name="Help" component={HelpScreen} />
                 <Stack.Screen name="Privacy" component={PrivacyScreen} />
 
                 {/* Main App (Tab Navigator) */}
                 <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+                
+                {/* Global Modals/Screens */}
+                <Stack.Screen
+                    name="DocumentViewer"
+                    component={DocumentViewerScreen}
+                    options={{ presentation: 'modal' }}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );

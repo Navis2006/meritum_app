@@ -213,12 +213,16 @@ const GalleryCard = ({
                     </Text>
                 </View>
 
-                {/* PLACEHOLDER: Tecnologías (futuro) */}
-                {/* 
-                <View style={styles.techRow}>
-                    <View style={styles.techChip}><Text>PHP</Text></View>
-                </View>
-                */}
+                {/* Tecnologías */}
+                {project.technologies && project.technologies.length > 0 && (
+                    <View style={styles.techRow}>
+                        {project.technologies.map((tech, idx) => (
+                            <View key={idx} style={[styles.techChip, { backgroundColor: neonColor + '20' }]}>
+                                <Text style={[styles.techText, { color: neonColor }]}>{tech.trim()}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
             </View>
         </TouchableOpacity>
     );
@@ -332,9 +336,25 @@ const styles = StyleSheet.create({
         minWidth: 60,
         textAlign: 'right',
     },
-    // PLACEHOLDER: Estilos para tecnologías (futuro)
-    // techRow: { flexDirection: 'row', gap: 4, marginTop: 6 },
-    // techChip: { backgroundColor: '#f1f5f9', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+    techRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+        marginTop: 10,
+    },
+    techChip: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 9999, // 'full'
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    techText: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+    },
 });
 
 export default GalleryCard;

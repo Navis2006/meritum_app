@@ -9,7 +9,7 @@ import {
     Dimensions,
 } from 'react-native';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-import { Colors, Spacing } from '../theme';
+import { Colors, Spacing, BorderRadius, Shadows } from '../theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -47,11 +47,7 @@ const WelcomeScreen = ({ navigation }: any) => {
     };
 
     return (
-        <TouchableOpacity
-            style={styles.container}
-            activeOpacity={1}
-            onPress={handlePress}
-        >
+        <View style={styles.container}>
             <StatusBar hidden={true} />
 
             {/* Top Spacer */}
@@ -81,14 +77,25 @@ const WelcomeScreen = ({ navigation }: any) => {
             {/* Bottom Spacer */}
             <View style={{ flex: 1 }} />
 
-            {/* Footer Action */}
+            {/* Footer Actions */}
             <View style={styles.footer}>
-                <Animated.View style={[styles.touchIconContainer, { transform: [{ scale: scaleAnim }] }]}>
-                    <Icon name="fingerprint" size={32} color={Colors.primary} />
-                </Animated.View>
-                <Text style={styles.footerText}>TOCA LA PANTALLA PARA EXPLORAR</Text>
+                <TouchableOpacity
+                    style={[styles.button, Shadows.primaryGlow]}
+                    onPress={() => navigation.navigate('Login')}
+                    activeOpacity={0.9}
+                >
+                    <Text style={styles.buttonText}>INICIAR SESIÓN</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.button, styles.outlineButton]}
+                    onPress={() => navigation.navigate('Register')}
+                    activeOpacity={0.7}
+                >
+                    <Text style={styles.outlineButtonText}>CREAR CUENTA</Text>
+                </TouchableOpacity>
             </View>
-        </TouchableOpacity>
+        </View>
     );
 };
 
@@ -162,24 +169,34 @@ const styles = StyleSheet.create({
         fontWeight: '300',
     },
     footer: {
-        alignItems: 'center',
+        width: '100%',
         paddingBottom: Spacing.xxl * 2,
         gap: Spacing.md,
     },
-    touchIconContainer: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: 'rgba(244, 140, 37, 0.1)', // Primary opacity 0.1
+    button: {
+        width: '100%',
+        backgroundColor: Colors.primary,
+        paddingVertical: Spacing.lg,
+        borderRadius: BorderRadius.xxl,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: Spacing.sm,
     },
-    footerText: {
-        fontSize: 12,
-        color: Colors.gray400,
-        letterSpacing: 1.5,
-        textTransform: 'uppercase',
+    buttonText: {
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+    },
+    outlineButton: {
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderColor: Colors.primary,
+    },
+    outlineButtonText: {
+        color: Colors.primary,
+        fontSize: 14,
+        fontWeight: 'bold',
+        letterSpacing: 1,
     },
 });
 

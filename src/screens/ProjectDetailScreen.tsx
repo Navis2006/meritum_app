@@ -156,6 +156,17 @@ const ProjectDetailScreen = ({ route, navigation }: any) => {
                         {project.description || 'Sin descripción disponible.'}
                     </Text>
 
+                    {/* Tecnologías */}
+                    {project.technologies && project.technologies.length > 0 && (
+                        <View style={styles.techRow}>
+                            {project.technologies.map((tech, idx) => (
+                                <View key={idx} style={styles.techChip}>
+                                    <Text style={styles.techText}>{tech.trim()}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
+
                     {/* Links Grid */}
                     <View style={styles.detailGrid}>
                         {/* El video ya se renderiza arriba a ancho completo */}
@@ -164,7 +175,7 @@ const ProjectDetailScreen = ({ route, navigation }: any) => {
                                 <TouchableOpacity
                                     key={`doc-${index}`}
                                     style={[styles.detailCard, Shadows.card, { marginTop: index > 0 ? Spacing.sm : 0 }]}
-                                    onPress={() => Linking.openURL(url)}
+                                    onPress={() => navigation.navigate('DocumentViewer', { url, title: `Documento Adjunto ${index + 1}` })}
                                 >
                                     <View style={styles.detailHeader}>
                                         <Icon name="description" size={20} color={Colors.primary} />
@@ -427,6 +438,25 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         letterSpacing: 0.5,
+    },
+    techRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: Spacing.xs,
+        marginTop: Spacing.sm,
+        marginBottom: Spacing.lg,
+    },
+    techChip: {
+        backgroundColor: Colors.primary + '20', // Naranja claro
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 9999, // 'full'
+    },
+    techText: {
+        color: Colors.primary,
+        fontSize: 12,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
     },
 });
 
